@@ -1,92 +1,181 @@
-import MediaPlaceholder from "@/components/MediaPlaceholder";
+'use client';
+
+import GeologyMap from "@/components/GeologyMap";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Section } from "@/components/ui/section";
+import { Clock, Phone, Mail, AlertTriangle, Sun, Map, User } from 'lucide-react';
+import Image from 'next/image';
+import { motion } from "framer-motion";
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 }
+};
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
 export default function Landmarks() {
+  const visitingGuide = [
+    {
+      icon: Clock,
+      title: 'أفضل وقت للزيارة',
+      description: 'من أكتوبر إلى مارس'
+    },
+    {
+      icon: User,
+      title: 'المرشد السياحي',
+      description: 'يُنصح بحجز مرشد سياحي للمواقع النائية'
+    },
+    {
+      icon: AlertTriangle,
+      title: 'احتياطات السلامة',
+      description: 'احرص على حمل كمية كافية من المياه'
+    },
+    {
+      icon: Sun,
+      title: 'إرشادات عامة',
+      description: 'التزم بإرشادات السلامة في كل موقع'
+    }
+  ];
+
+  const contactInfo = [
+    {
+      icon: Phone,
+      title: 'مركز المعلومات السياحية',
+      info: '800-77777'
+    },
+    {
+      icon: Phone,
+      title: 'خدمات الطوارئ',
+      info: '9999'
+    },
+    {
+      icon: Mail,
+      title: 'البريد الإلكتروني',
+      info: 'info@geo-oman.com'
+    }
+  ];
+
   return (
-    <main className="container mx-auto px-4 py-8 max-w-6xl">
+    <main className="min-h-screen bg-gradient-to-b from-white to-blue-50/50">
       {/* Hero Section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-6">المعالم الجيولوجية</h1>
-        <p className="text-xl text-gray-700 mb-8">اكتشف أبرز المعالم الجيولوجية في سلطنة عُمان</p>
-        <MediaPlaceholder type="image" width={1200} height={500} className="rounded-xl shadow-lg" />
-      </div>
+      <motion.div 
+        className="relative h-[40vh] overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Image
+          src="https://images.unsplash.com/photo-1444492417251-9c84a5fa18e0"
+          alt="Oman Landscape"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/60" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <h1 className="text-5xl font-bold text-white text-center drop-shadow-lg">
+            خريطة المعالم
+          </h1>
+        </div>
+      </motion.div>
 
-      {/* Featured Landmarks */}
-      <div className="grid md:grid-cols-3 gap-8 mb-12">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <MediaPlaceholder type="image" width={400} height={300} className="rounded-lg mb-4" />
-          <h2 className="text-2xl font-bold mb-3 text-emerald-700">جبل شمس</h2>
-          <p className="text-gray-700 mb-4">أعلى قمة جبلية في عُمان، يوفر إطلالات خلابة على الوديان المحيطة.</p>
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>الارتفاع: 3,009 م</span>
-            <span>الموقع: محافظة الداخلية</span>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <MediaPlaceholder type="image" width={400} height={300} className="rounded-lg mb-4" />
-          <h2 className="text-2xl font-bold mb-3 text-emerald-700">وادي شاب</h2>
-          <p className="text-gray-700 mb-4">وادٍ طبيعي خلاب يتميز بمياهه العذبة وتكويناته الصخرية الفريدة.</p>
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>الطول: 2.1 كم</span>
-            <span>الموقع: محافظة مسقط</span>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <MediaPlaceholder type="image" width={400} height={300} className="rounded-lg mb-4" />
-          <h2 className="text-2xl font-bold mb-3 text-emerald-700">كهف الهوتة</h2>
-          <p className="text-gray-700 mb-4">كهف طبيعي يضم تشكيلات من الصواعد والهوابط الكلسية.</p>
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>العمق: 200 م</span>
-            <span>الموقع: ولاية الحمراء</span>
-          </div>
-        </div>
-      </div>
+      {/* Map Section */}
+      <Section className="py-12">
+        <motion.div 
+          className="mb-8"
+          variants={fadeInUp}
+        >
+          <h2 className="text-3xl font-bold text-blue-900 mb-4 text-center">المواقع الجيولوجية</h2>
+          <p className="text-gray-600 text-center max-w-3xl mx-auto">
+            اكتشف أبرز المواقع الجيولوجية في عُمان من خلال خريطتنا التفاعلية
+          </p>
+        </motion.div>
+        <GeologyMap />
+      </Section>
 
-      {/* Virtual Tour Section */}
-      <div className="bg-white p-8 rounded-lg shadow-md mb-12">
-        <h2 className="text-2xl font-bold mb-6 text-emerald-700">جولة افتراضية</h2>
-        <div className="aspect-w-16 aspect-h-9 mb-6">
-          <MediaPlaceholder type="video" width={1000} height={562} className="rounded-lg" />
-        </div>
-        <p className="text-gray-700 leading-relaxed">
-          استمتع بجولة افتراضية 360 درجة في أهم المعالم الجيولوجية في عُمان.
-        </p>
-      </div>
+      {/* Visiting Guide */}
+      <Section className="py-12 bg-white">
+        <motion.div 
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="text-3xl font-bold text-blue-900 mb-8 text-center">دليل الزيارة</h2>
+        </motion.div>
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+        >
+          {visitingGuide.map((item, index) => (
+            <motion.div 
+              key={index} 
+              className="hover:shadow-lg transition-shadow"
+              variants={fadeInUp}
+            >
+              <Card>
+                <CardHeader>
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <item.icon className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <CardTitle className="text-lg">{item.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">{item.description}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+      </Section>
 
-      {/* Geological Map */}
-      <div className="bg-white p-8 rounded-lg shadow-md mb-12">
-        <h2 className="text-2xl font-bold mb-6 text-emerald-700">خريطة المعالم</h2>
-        <MediaPlaceholder type="image" width={1000} height={600} className="rounded-lg mb-6" />
-        <div className="grid md:grid-cols-2 gap-8">
-          <div>
-            <h3 className="text-xl font-semibold mb-3 text-emerald-600">دليل الزيارة</h3>
-            <ul className="list-disc list-inside space-y-2 text-gray-700">
-              <li>أفضل وقت للزيارة: من أكتوبر إلى مارس</li>
-              <li>يُنصح بحجز مرشد سياحي للمواقع النائية</li>
-              <li>احرص على حمل كمية كافية من المياه</li>
-              <li>التزم بإرشادات السلامة في كل موقع</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold mb-3 text-emerald-600">معلومات الاتصال</h3>
-            <ul className="space-y-2 text-gray-700">
-              <li>مركز المعلومات السياحية: 800-77777</li>
-              <li>خدمات الطوارئ: 9999</li>
-              <li>البريد الإلكتروني: info@geooman.com</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Photo Gallery */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold mb-6 text-emerald-700">معرض الصور</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <MediaPlaceholder type="image" width={300} height={300} className="rounded-lg shadow-md" />
-          <MediaPlaceholder type="image" width={300} height={300} className="rounded-lg shadow-md" />
-          <MediaPlaceholder type="image" width={300} height={300} className="rounded-lg shadow-md" />
-          <MediaPlaceholder type="image" width={300} height={300} className="rounded-lg shadow-md" />
-        </div>
-      </div>
+      {/* Contact Information */}
+      <Section className="py-12">
+        <motion.div 
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="text-3xl font-bold text-blue-900 mb-8 text-center">معلومات الاتصال</h2>
+        </motion.div>
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+        >
+          {contactInfo.map((item, index) => (
+            <motion.div 
+              key={index} 
+              className="hover:shadow-lg transition-shadow"
+              variants={fadeInUp}
+            >
+              <Card>
+                <CardHeader>
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <item.icon className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <CardTitle className="text-lg">{item.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-blue-600 font-semibold text-lg text-center">{item.info}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+      </Section>
     </main>
   );
 }

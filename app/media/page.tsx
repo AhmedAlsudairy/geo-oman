@@ -1,98 +1,139 @@
+'use client'
 import MediaPlaceholder from "@/components/MediaPlaceholder";
+import { geologicalVideos } from "@/lib/youtubeData";
+import YouTubePlayer from "@/components/YouTubePlayer";
+import GeologyVideoGallery from "@/components/GeologyVideoGallery";
+import { motion } from "framer-motion";
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 }
+};
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
 export default function Media() {
+  // Get the mountains video for the featured section
+  const featuredVideo = geologicalVideos.find(v => v.category === 'mountains');
+  
   return (
     <main className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Hero Section */}
-      <div className="text-center mb-12">
+      <motion.div 
+        className="text-center mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
         <h1 className="text-4xl font-bold mb-6">الوسائط المتعددة</h1>
         <p className="text-xl text-gray-700 mb-8">استكشف مجموعتنا الغنية من الصور والفيديوهات الجيولوجية</p>
-      </div>
+      </motion.div>
 
       {/* Featured Video */}
-      <div className="bg-white p-8 rounded-lg shadow-md mb-12">
+      <motion.div 
+        className="bg-white p-8 rounded-lg shadow-md mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
         <h2 className="text-2xl font-bold mb-6 text-emerald-700">الفيديو المميز</h2>
         <div className="aspect-w-16 aspect-h-9 mb-6">
-          <MediaPlaceholder type="video" width={1000} height={562} className="rounded-lg" />
+          {featuredVideo && (
+            <YouTubePlayer
+              video={featuredVideo}
+              width={1000}
+              height={562}
+              isArabic={true}
+              className="rounded-lg"
+            />
+          )}
         </div>
-        <h3 className="text-xl font-semibold mb-2">رحلة في أعماق جبال عُمان</h3>
-        <p className="text-gray-700">استكشف الطبيعة الجيولوجية المذهلة لجبال عُمان في هذا الفيديو الوثائقي المميز.</p>
-      </div>
+      </motion.div>
 
       {/* Photo Gallery */}
-      <div className="mb-12">
+      <motion.div 
+        className="mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+      >
         <h2 className="text-2xl font-bold mb-6 text-emerald-700">معرض الصور</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="space-y-6">
-            <MediaPlaceholder type="image" width={400} height={300} className="rounded-lg shadow-md" />
-            <MediaPlaceholder type="image" width={400} height={500} className="rounded-lg shadow-md" />
-            <MediaPlaceholder type="image" width={400} height={300} className="rounded-lg shadow-md" />
-          </div>
-          <div className="space-y-6">
-            <MediaPlaceholder type="image" width={400} height={500} className="rounded-lg shadow-md" />
-            <MediaPlaceholder type="image" width={400} height={300} className="rounded-lg shadow-md" />
-            <MediaPlaceholder type="image" width={400} height={500} className="rounded-lg shadow-md" />
-          </div>
-          <div className="space-y-6">
-            <MediaPlaceholder type="image" width={400} height={300} className="rounded-lg shadow-md" />
-            <MediaPlaceholder type="image" width={400} height={500} className="rounded-lg shadow-md" />
-            <MediaPlaceholder type="image" width={400} height={300} className="rounded-lg shadow-md" />
-          </div>
-        </div>
-      </div>
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+        >
+          <motion.div 
+            className="space-y-6"
+            variants={fadeInUp}
+          >
+            <MediaPlaceholder type="image" width={400} height={300} className="rounded-lg shadow-md" topic="mountains" category="geology" />
+            <MediaPlaceholder type="image" width={400} height={500} className="rounded-lg shadow-md" topic="wadis" category="geology" />
+            <MediaPlaceholder type="image" width={400} height={300} className="rounded-lg shadow-md" topic="caves" category="geology" />
+          </motion.div>
+          <motion.div 
+            className="space-y-6"
+            variants={fadeInUp}
+          >
+            <MediaPlaceholder type="image" width={400} height={500} className="rounded-lg shadow-md" topic="rocks" category="geology" />
+            <MediaPlaceholder type="image" width={400} height={300} className="rounded-lg shadow-md" topic="minerals" category="geology" />
+            <MediaPlaceholder type="image" width={400} height={500} className="rounded-lg shadow-md" topic="desert" category="geology" />
+          </motion.div>
+          <motion.div 
+            className="space-y-6"
+            variants={fadeInUp}
+          >
+            <MediaPlaceholder type="image" width={400} height={300} className="rounded-lg shadow-md" topic="ophiolite" category="geology" />
+            <MediaPlaceholder type="image" width={400} height={500} className="rounded-lg shadow-md" topic="fossils" category="geology" />
+            <MediaPlaceholder type="image" width={400} height={300} className="rounded-lg shadow-md" topic="landscape" category="geology" />
+          </motion.div>
+        </motion.div>
+      </motion.div>
 
       {/* Video Series */}
-      <div className="mb-12">
+      <motion.div 
+        className="mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.6 }}
+      >
         <h2 className="text-2xl font-bold mb-6 text-emerald-700">سلسلة الفيديوهات التعليمية</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <MediaPlaceholder type="video" width={400} height={225} className="rounded-lg mb-4" />
-            <h3 className="text-lg font-semibold mb-2">تشكل الجبال في عُمان</h3>
-            <p className="text-gray-700">الحلقة الأولى: رحلة عبر الزمن الجيولوجي</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <MediaPlaceholder type="video" width={400} height={225} className="rounded-lg mb-4" />
-            <h3 className="text-lg font-semibold mb-2">الصخور البركانية</h3>
-            <p className="text-gray-700">الحلقة الثانية: أنواع الصخور وتصنيفها</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <MediaPlaceholder type="video" width={400} height={225} className="rounded-lg mb-4" />
-            <h3 className="text-lg font-semibold mb-2">المعادن في عُمان</h3>
-            <p className="text-gray-700">الحلقة الثالثة: اكتشاف الثروات المعدنية</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Interactive 360° Tours */}
-      <div className="bg-white p-8 rounded-lg shadow-md mb-12">
-        <h2 className="text-2xl font-bold mb-6 text-emerald-700">جولات افتراضية 360°</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>
-            <MediaPlaceholder type="image" width={500} height={300} className="rounded-lg mb-4" />
-            <h3 className="text-lg font-semibold mb-2">كهف الهوتة</h3>
-            <p className="text-gray-700">استكشف كهف الهوتة في جولة افتراضية شاملة</p>
-          </div>
-          <div>
-            <MediaPlaceholder type="image" width={500} height={300} className="rounded-lg mb-4" />
-            <h3 className="text-lg font-semibold mb-2">جبل شمس</h3>
-            <p className="text-gray-700">شاهد المناظر الخلابة لجبل شمس بتقنية 360 درجة</p>
-          </div>
-        </div>
-      </div>
+        <GeologyVideoGallery isArabic={true} className="bg-white p-6 rounded-lg shadow-md" />
+      </motion.div>
 
       {/* Download Section */}
-      <div className="bg-emerald-50 p-8 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4 text-emerald-700">تحميل الوسائط</h2>
-        <p className="text-gray-700 mb-6">قم بتحميل الصور عالية الدقة والفيديوهات التعليمية</p>
-        <div className="flex gap-4">
-          <button className="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700">
-            تحميل الصور
-          </button>
-          <button className="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700">
-            تحميل الفيديوهات
-          </button>
+      <motion.div 
+        className="bg-emerald-50 p-8 rounded-lg shadow-md"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.8 }}
+      >
+        <h2 className="text-2xl font-bold mb-6 text-emerald-700">تحميل المواد التعليمية</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h3 className="text-lg font-semibold mb-4">دليل الجيولوجيا العماني</h3>
+            <p className="text-gray-700 mb-4">دليل شامل عن الجيولوجيا في عمان مع خرائط وصور توضيحية</p>
+            <button className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
+              تحميل PDF
+            </button>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h3 className="text-lg font-semibold mb-4">مجموعة الخرائط الجيولوجية</h3>
+            <p className="text-gray-700 mb-4">خرائط تفصيلية للتكوينات الجيولوجية في عمان</p>
+            <button className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
+              تحميل الخرائط
+            </button>
+          </div>
         </div>
-      </div>
+      </motion.div>
     </main>
   );
 }
