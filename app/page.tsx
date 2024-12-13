@@ -107,8 +107,8 @@ function HeroSection() {
       animate={{ opacity: 1 }}
       className="relative h-[85vh] overflow-hidden"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-transparent to-blue-900/40 z-10" />
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-900/30 via-transparent to-blue-900/30 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-b from-brand-brown/30 via-transparent to-brand-brown/40 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-r from-brand-brown/30 via-transparent to-brand-brown/30 z-10" />
       
       <motion.div style={{ y }} className="relative w-full h-full">
         <Image
@@ -132,6 +132,15 @@ function HeroSection() {
             <motion.p 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-3xl md:text-4xl text-white/90 text-center drop-shadow-lg mb-6 font-tejwal"
+            >
+              اكتشف هندسة الارض مجانا
+            </motion.p>
+
+            <motion.p 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
               className="text-2xl md:text-3xl text-white/90 text-center drop-shadow-lg mb-12 font-light"
             >
@@ -148,7 +157,7 @@ function HeroSection() {
                 onClick={handleExploreClick}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-blue-600 text-white px-8 py-4 rounded-full transition-all duration-300 font-medium flex items-center gap-2 hover:gap-3 hover:bg-blue-700"
+                className="bg-brand-brown text-white px-8 py-4 rounded-full transition-all duration-300 font-medium flex items-center gap-2 hover:bg-brand-brown/90"
               >
                 <span>اكتشف المزيد</span>
                 <ChevronRight className="w-5 h-5" />

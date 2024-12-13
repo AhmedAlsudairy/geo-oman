@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Mountain } from 'lucide-react'
+import Image from 'next/image'
 
 const Navigation = () => {
   const pathname = usePathname()
@@ -23,17 +23,26 @@ const Navigation = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 100 }}
-      className="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-blue-100"
+      className="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-brand-brown/10"
     >
       <nav className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between mb-4">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 text-blue-600"
+            className="flex items-center gap-3 text-brand-brown"
           >
-            <Mountain className="h-8 w-8" />
-            <span className="text-xl font-bold">جيو عُمان</span>
+            <Image 
+              src="/images/logo.svg" 
+              alt="Geo Oman Logo" 
+              width={60} 
+              height={60}
+              className="h-16 w-auto"
+            />
+            <div className="flex flex-col">
+              <span className="text-3xl font-bold text-brand-brown">جيو عُمان</span>
+              <span className="text-sm text-brand-brown/80 font-tejwal">اكتشف هندسة الارض مجانا</span>
+            </div>
           </motion.div>
           <motion.div 
             initial={{ opacity: 0 }}
@@ -55,8 +64,8 @@ const Navigation = () => {
                 href={item.href} 
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ${
                   pathname === item.href 
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md' 
-                    : 'text-blue-600 hover:bg-blue-50 hover:shadow-sm'
+                    ? 'bg-gradient-to-r from-brand-brown to-brand-brown/80 text-white shadow-md' 
+                    : 'text-brand-brown hover:bg-brand-brown/10 hover:shadow-sm'
                 }`}
               >
                 {item.label}

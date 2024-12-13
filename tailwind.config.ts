@@ -14,6 +14,11 @@ const config: Config = {
   			tajawal: ['Tajawal', 'Arial', 'sans-serif'],
   		},
   		colors: {
+  			brand: {
+  				brown: '#8B4513',  // Main brown color from logo
+  				olive: '#808000',  // Olive green from logo
+  				accent: '#00CED1', // Turquoise accent from logo
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
