@@ -120,6 +120,21 @@ function HeroSection() {
         />
         <motion.div style={{ opacity }} className="absolute inset-0 z-20 flex flex-col items-center justify-center">
           <div className="max-w-4xl px-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="flex justify-center mb-8"
+            >
+              <Image 
+                src="/images/logo.svg" 
+                alt="Geo Oman Logo" 
+                width={200} 
+                height={200}
+                className="w-48 h-48 drop-shadow-2xl"
+                priority
+              />
+            </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -135,7 +150,9 @@ function HeroSection() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-3xl md:text-4xl text-white/90 text-center drop-shadow-lg mb-6 font-tejwal"
             >
-              اكتشف هندسة الارض مجانا
+          
+          
+          اكتشف هندسة الارض مجان   
             </motion.p>
 
             <motion.p 

@@ -10,6 +10,7 @@ const Navigation = () => {
   const navItems = [
     { href: '/', label: 'الصفحة الرئيسية' },
     { href: '/about', label: 'من نحن' },
+    { href: '/store', label: 'المتجر' },
     { href: '/geology', label: 'جيولوجيا عُمـان' },
     { href: '/landmarks', label: 'المعالم الجيولوجية' },
     { href: '/activities', label: 'الأنشطة التعليمية' },
@@ -39,10 +40,7 @@ const Navigation = () => {
               height={60}
               className="h-16 w-auto"
             />
-            <div className="flex flex-col">
-              <span className="text-3xl font-bold text-brand-brown">جيو عُمان</span>
-              <span className="text-sm text-brand-brown/80 font-tejwal">اكتشف هندسة الارض مجانا</span>
-            </div>
+            <span className="text-3xl font-bold text-brand-brown">جيو عُمان</span>
           </motion.div>
           <motion.div 
             initial={{ opacity: 0 }}

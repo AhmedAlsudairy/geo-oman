@@ -34,25 +34,39 @@ export default function About() {
       <motion.section 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="relative h-[50vh] overflow-hidden"
+        className="relative h-[60vh] overflow-hidden"
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-transparent to-blue-900/40 z-10" />
+        {/* Multiple gradient overlays for depth and brand colors */}
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-brown/25 via-transparent to-brand-brown/25 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-brown/25 via-transparent to-brand-olive/25 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/10 via-transparent to-transparent z-10" />
+        
         <Image
-          src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b"
-          alt="Oman Landscape"
+          src="https://images.unsplash.com/photo-1508108712903-49b7ef9b1df8"
+          alt="Oman Geological Formation"
           fill
-          className="object-cover"
+          className="object-cover object-center"
           priority
         />
         <div className="absolute inset-0 z-20 flex items-center justify-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-5xl font-bold text-white text-center drop-shadow-2xl [text-shadow:_2px_2px_10px_rgb(0_0_0_/_40%)]"
-          >
-            تعرف علينا
-          </motion.h1>
+          <div className="text-center">
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="text-5xl md:text-6xl font-bold mb-6 text-white text-center drop-shadow-2xl [text-shadow:_2px_2px_10px_rgb(0_0_0_/_40%)]"
+            >
+              من نحن
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto px-4 drop-shadow-lg"
+            >
+              نكتشف ونوثق جمال وتنوع التضاريس الجيولوجية في سلطنة عُمان
+            </motion.p>
+          </div>
         </div>
       </motion.section>
 
@@ -96,48 +110,62 @@ export default function About() {
       {/* Gallery Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="relative h-[400px] rounded-2xl overflow-hidden"
+              className="relative h-[400px] rounded-2xl overflow-hidden group"
             >
               <Image
-                src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b"
-                alt="Oman Mountains"
+                src="https://images.squarespace-cdn.com/content/v1/638a651ad5f9324e20972bf2/1670014559338-0PQ97WKETECR0ADZRIWW/Wadi+Tiwi+in+the+Al+Sharqiyah+region+is+named+after+the+nearby+Tiwi+Village.jpeg?format=2500w"
+                alt="Wadi Tiwi Landscape"
                 fill
-                className="object-cover transition-transform duration-300 hover:scale-105"
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-brown/60 via-brand-brown/20 to-transparent transition-opacity duration-300 group-hover:opacity-70" />
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative h-[400px] rounded-2xl overflow-hidden"
+              className="relative h-[400px] rounded-2xl overflow-hidden group"
             >
               <Image
-                src="https://images.unsplash.com/photo-1451186242394-2b461812025b"
-                alt="Oman Landscape"
+                src="https://nawafir-tours.com/wp-content/uploads/2024/01/Wadi-Tiwi-01.jpg"
+                alt="Wadi Tiwi Waters"
                 fill
-                className="object-cover transition-transform duration-300 hover:scale-105"
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-brown/60 via-brand-brown/20 to-transparent transition-opacity duration-300 group-hover:opacity-70" />
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="relative h-[400px] rounded-2xl overflow-hidden"
+              className="relative h-[400px] rounded-2xl overflow-hidden group"
             >
               <Image
-                src="https://images.unsplash.com/photo-1512036666432-2181c1f26420"
-                alt="Oman Nature"
+                src="https://salalahsafari.com/wp-content/uploads/2024/03/Untitled-design-2024-03-23T153111.682.jpg"
+                alt="Wadi Tiwi Cliffs"
                 fill
-                className="object-cover transition-transform duration-300 hover:scale-105"
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-brown/60 via-brand-brown/20 to-transparent transition-opacity duration-300 group-hover:opacity-70" />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="relative h-[400px] rounded-2xl overflow-hidden group"
+            >
+              <Image
+                src="https://salalahsafari.com/wp-content/uploads/2024/03/Untitled-design-2024-03-23T152104.964.jpg"
+                alt="Wadi Tiwi Valley"
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-brown/60 via-brand-brown/20 to-transparent transition-opacity duration-300 group-hover:opacity-70" />
             </motion.div>
           </div>
         </div>
