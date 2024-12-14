@@ -152,7 +152,7 @@ function HeroSection() {
             >
           
           
-          اكتشف هندسة الارض-ارض مجان   
+          اكتشف هندسة  أرض مجان   
             </motion.p>
 
             <motion.p 
