@@ -105,7 +105,7 @@ function HeroSection() {
       ref={ref}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="relative h-[85vh] overflow-hidden"
+      className="relative h-[85vh] sm:h-[90vh] overflow-hidden"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-brand-brown/30 via-transparent to-brand-brown/40 z-10" />
       <div className="absolute inset-0 bg-gradient-to-r from-brand-brown/30 via-transparent to-brand-brown/30 z-10" />
@@ -118,20 +118,20 @@ function HeroSection() {
           className="object-cover"
           priority
         />
-        <motion.div style={{ opacity }} className="absolute inset-0 z-20 flex flex-col items-center justify-center">
-          <div className="max-w-4xl px-4">
+        <motion.div style={{ opacity }} className="absolute inset-0 z-20 flex flex-col items-center justify-center px-4">
+          <div className="max-w-4xl w-full">
             <motion.div
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="flex justify-center mb-8"
+              className="flex justify-center mb-4 sm:mb-8"
             >
               <Image 
                 src="/images/logo.svg" 
                 alt="Geo Oman Logo" 
                 width={200} 
                 height={200}
-                className="w-48 h-48 drop-shadow-2xl"
+                className="w-32 h-32 sm:w-48 sm:h-48 drop-shadow-2xl"
                 priority
               />
             </motion.div>
@@ -139,7 +139,7 @@ function HeroSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-6xl md:text-7xl font-bold mb-6 text-white text-center drop-shadow-2xl [text-shadow:_2px_2px_10px_rgb(0_0_0_/_40%)]"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 text-white text-center drop-shadow-2xl [text-shadow:_2px_2px_10px_rgb(0_0_0_/_40%)]"
             >
               مرحباً بكم في موقع جيولوجيا عُمان
             </motion.h1>
@@ -148,18 +148,18 @@ function HeroSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-3xl md:text-4xl text-white/90 text-center drop-shadow-lg mb-6 font-tejwal"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white/90 text-center drop-shadow-lg mb-4 sm:mb-6 font-tejwal"
             >
           
           
-          اكتشف هندسة الارض مجان   
+          اكتشف هندسة الارص-ارض مجان   
             </motion.p>
 
             <motion.p 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="text-2xl md:text-3xl text-white/90 text-center drop-shadow-lg mb-12 font-light"
+              className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/90 text-center drop-shadow-lg mb-8 sm:mb-12 font-light"
             >
               اكتشف الثروات الجيولوجية الرائعة لسلطنة عُمان
             </motion.p>
@@ -174,16 +174,16 @@ function HeroSection() {
                 onClick={handleExploreClick}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-brand-brown text-white px-8 py-4 rounded-full transition-all duration-300 font-medium flex items-center gap-2 hover:bg-brand-brown/90"
+                className="bg-brand-brown text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full transition-all duration-300 font-medium flex items-center gap-2 hover:bg-brand-brown/90 text-sm sm:text-base"
               >
                 <span>اكتشف المزيد</span>
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </motion.button>
               <motion.button
                 onClick={handleContactClick}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-full border-2 border-white/20 hover:bg-white/20 transition-all duration-300 font-medium"
+                className="bg-white/10 backdrop-blur-sm text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full border-2 border-white/20 hover:bg-white/20 transition-all duration-300 font-medium text-sm sm:text-base"
               >
                 تواصل معنا
               </motion.button>
