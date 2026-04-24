@@ -290,7 +290,7 @@ export default function LiveCamera() {
                   const pcm = float32ToInt16(e.inputBuffer.getChannelData(0))
                   ws.send(JSON.stringify({
                     realtimeInput: {
-                      audio: { data: bufferToBase64(pcm.buffer), mimeType: 'audio/pcm;rate=16000' },
+                      audio: { data: bufferToBase64(pcm.buffer as ArrayBuffer), mimeType: 'audio/pcm;rate=16000' },
                     },
                   }))
                 }
