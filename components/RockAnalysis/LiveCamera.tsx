@@ -194,9 +194,18 @@ export default function LiveCamera() {
         }))
       }
 
-      ws.onmessage = (event) => {
+      // Gemini Live sends frames as Blobs, not plain strings
+      ws.binaryType = 'blob'
+
+      ws.onmessage = async (event) => {
         try {
-          const msg = JSON.parse(event.data as string)
+          // Decode Blob → text, or use string directly
+          const text: string =
+            event.data instanceof Blob
+              ? await (event.data as Blob).text()
+              : (event.data as string)
+
+          const msg = JSON.parse(text)
 
           // ── Handle setupComplete (first message) ──
           if (!setupDoneRef.current) {
