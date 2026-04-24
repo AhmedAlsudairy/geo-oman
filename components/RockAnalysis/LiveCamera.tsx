@@ -24,6 +24,7 @@ export default function LiveCamera() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const wsRef = useRef<WebSocket | null>(null)
   const audioCtxRef = useRef<AudioContext | null>(null)
+  const nextAudioTimeRef = useRef<number>(0)
   const streamRef = useRef<MediaStream | null>(null)
   const frameTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const sessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -75,6 +76,7 @@ export default function LiveCamera() {
 
     audioCtxRef.current?.close().catch(() => {})
     audioCtxRef.current = null
+    nextAudioTimeRef.current = 0
 
     setupDoneRef.current = false
     isLiveRef.current = false
@@ -113,11 +115,15 @@ export default function LiveCamera() {
   }, [])
 
   // ── Play PCM audio from Gemini ───────────────────────────────
+  // Force 24kHz context so no resampling ambiguity.
+  // Schedule chunks sequentially but reset queue if it grows stale (>200ms behind)
+  // to avoid latency buildup without causing overlap.
   const playPcm = useCallback((b64: string, sampleRate = 24000) => {
     if (muted) return
     try {
       if (!audioCtxRef.current) {
-        audioCtxRef.current = new AudioContext()
+        // Force 24kHz to exactly match Gemini PCM output — no resampling speed distortion
+        audioCtxRef.current = new AudioContext({ sampleRate: 24000 })
       }
       const ctx = audioCtxRef.current
       if (ctx.state === 'suspended') ctx.resume()
@@ -127,10 +133,16 @@ export default function LiveCamera() {
       const buf = ctx.createBuffer(1, samples.length, sampleRate)
       buf.copyToChannel(samples, 0)
 
+      // If queue has fallen more than 200ms behind real-time, reset to now.
+      // This prevents latency buildup while still keeping chunks sequential.
+      if (nextAudioTimeRef.current < ctx.currentTime - 0.2) {
+        nextAudioTimeRef.current = ctx.currentTime + 0.05
+      }
       const src = ctx.createBufferSource()
       src.buffer = buf
       src.connect(ctx.destination)
-      src.start()
+      src.start(nextAudioTimeRef.current)
+      nextAudioTimeRef.current += buf.duration
     } catch (e) {
       console.warn('[LiveCamera] audio playback error', e)
     }
@@ -223,10 +235,16 @@ export default function LiveCamera() {
             setStatus('live')
 
             frameTimerRef.current = setInterval(sendFrame, FRAME_INTERVAL_MS)
-            // Send one initial prompt so model knows to start describing
-            ws.send(JSON.stringify({
-              realtimeInput: { text: 'صِف ما تراه أمامك بجملة أو جملتين فقط.' },
-            }))
+            // Send one frame immediately so model has visual context before the text prompt
+            sendFrame()
+            // Delay text prompt by 2s to ensure frames arrive first
+            setTimeout(() => {
+              if (wsRef.current?.readyState === WebSocket.OPEN) {
+                wsRef.current.send(JSON.stringify({
+                  realtimeInput: { text: 'صِف ما تراه بجملة أو جملتين فقط.' },
+                }))
+              }
+            }, 2000)
 
             sessionTimerRef.current = setTimeout(() => {
               setStatus('ended')
