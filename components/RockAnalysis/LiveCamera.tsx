@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Video, VideoOff, Loader2, Volume2, VolumeX } from 'lucide-react'
+import { Video, VideoOff, Loader2, Volume2, VolumeX, SwitchCamera } from 'lucide-react'
 import { LIVE_ROCK_EXPERT_PROMPT } from '@/services/rockAnalysisService'
 
 const MODEL = 'gemini-3.1-flash-live-preview'
@@ -36,6 +36,7 @@ export default function LiveCamera() {
   const [muted, setMuted] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(SESSION_LIMIT_MS / 1000)
   const [error, setError] = useState<string | null>(null)
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment')
 
   // ── Countdown ticker ────────────────────────────────────────
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -125,7 +126,10 @@ export default function LiveCamera() {
 
     try {
       // 1. Get webcam
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode },
+        audio: false,
+      })
       streamRef.current = stream
       if (videoRef.current) {
         videoRef.current.srcObject = stream
@@ -229,7 +233,31 @@ export default function LiveCamera() {
       setStatus('error')
       stopAll()
     }
-  }, [muted, sendFrame, sendTextPrompt, playPcm, stopAll, status])
+  }, [muted, facingMode, sendFrame, sendTextPrompt, playPcm, stopAll, status])
+
+  // ── Switch camera (front / rear) ────────────────────────────
+  const switchCamera = useCallback(async () => {
+    const newFacing = facingMode === 'environment' ? 'user' : 'environment'
+    setFacingMode(newFacing)
+
+    // If live, swap the stream without killing the WebSocket session
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop())
+      try {
+        const newStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: newFacing },
+          audio: false,
+        })
+        streamRef.current = newStream
+        if (videoRef.current) {
+          videoRef.current.srcObject = newStream
+          videoRef.current.play()
+        }
+      } catch {
+        setError('تعذّر التبديل بين الكاميرات')
+      }
+    }
+  }, [facingMode])
 
   const stop = useCallback(() => {
     setStatus('ended')
@@ -302,15 +330,25 @@ export default function LiveCamera() {
           </div>
         )}
 
-        {/* Mute toggle */}
-        <button
-          type="button"
-          onClick={() => setMuted((m) => !m)}
-          className="absolute top-3 left-3 flex items-center justify-center rounded-full bg-black/50 p-2 text-white backdrop-blur hover:bg-black/70 transition"
-          title={muted ? 'تشغيل الصوت' : 'كتم الصوت'}
-        >
-          {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-        </button>
+        {/* Top-left controls: mute + switch camera */}
+        <div className="absolute top-3 left-3 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMuted((m) => !m)}
+            className="flex items-center justify-center rounded-full bg-black/50 p-2 text-white backdrop-blur hover:bg-black/70 transition"
+            title={muted ? 'تشغيل الصوت' : 'كتم الصوت'}
+          >
+            {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          </button>
+          <button
+            type="button"
+            onClick={switchCamera}
+            className="flex items-center justify-center rounded-full bg-black/50 p-2 text-white backdrop-blur hover:bg-black/70 transition"
+            title={facingMode === 'environment' ? 'تحويل للكاميرا الأمامية' : 'تحويل للكاميرا الخلفية'}
+          >
+            <SwitchCamera className="h-4 w-4" />
+          </button>
+        </div>
 
         {/* Live transcript overlay */}
         {liveText && status === 'live' && (

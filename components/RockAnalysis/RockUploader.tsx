@@ -7,24 +7,44 @@ import ResultPanel, { ResultPanelSkeleton } from './ResultPanel'
 
 const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']
 const MAX_MB = 10
+// Vercel serverless limit is 4.5 MB request body.
+// We compress to JPEG at max 1024px and quality 0.7 to stay well under that.
+const MAX_SIDE_PX = 1024
+const JPEG_QUALITY = 0.7
 
-function fileToBase64(file: File): Promise<string> {
+function compressToBase64(file: File): Promise<{ data: string; mimeType: string }> {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      const result = reader.result as string
-      // Strip the data URL prefix (data:image/jpeg;base64,...)
-      resolve(result.split(',')[1])
+    const img = new window.Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      let { width, height } = img
+      if (width > MAX_SIDE_PX || height > MAX_SIDE_PX) {
+        if (width >= height) {
+          height = Math.round((height / width) * MAX_SIDE_PX)
+          width = MAX_SIDE_PX
+        } else {
+          width = Math.round((width / height) * MAX_SIDE_PX)
+          height = MAX_SIDE_PX
+        }
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) { reject(new Error('canvas error')); return }
+      ctx.drawImage(img, 0, 0, width, height)
+      const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY)
+      resolve({ data: dataUrl.split(',')[1], mimeType: 'image/jpeg' })
     }
-    reader.onerror = reject
-    reader.readAsDataURL(file)
+    img.onerror = reject
+    img.src = url
   })
 }
 
 export default function RockUploader() {
   const inputRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
-  const [mimeType, setMimeType] = useState<string>('image/jpeg')
   const [dragging, setDragging] = useState(false)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<RockAnalysisResult | null>(null)
@@ -42,16 +62,15 @@ export default function RockUploader() {
 
     setError(null)
     setResult(null)
-    setMimeType(file.type)
     setPreview(URL.createObjectURL(file))
 
     setLoading(true)
     try {
-      const imageData = await fileToBase64(file)
+      const { data: imageData, mimeType: compressedMime } = await compressToBase64(file)
       const res = await fetch('/api/analyze-rock', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageData, mimeType: file.type }),
+        body: JSON.stringify({ imageData, mimeType: compressedMime }),
       })
       const data = await res.json()
       if (!res.ok) {
