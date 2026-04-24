@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Video, VideoOff, Loader2, Volume2, VolumeX, SwitchCamera } from 'lucide-react'
+import { Video, VideoOff, Loader2, Volume2, VolumeX, SwitchCamera, Mic, MicOff } from 'lucide-react'
 import { LIVE_ROCK_EXPERT_PROMPT } from '@/services/rockAnalysisService'
 
 const MODEL = 'gemini-3.1-flash-live-preview'
@@ -19,12 +19,32 @@ function pcmToFloat32(buffer: ArrayBuffer): Float32Array {
   return out
 }
 
+// Convert float32 mic samples to 16-bit PCM for Gemini audio input
+function float32ToInt16(input: Float32Array): Int16Array {
+  const out = new Int16Array(input.length)
+  for (let i = 0; i < input.length; i++) {
+    out[i] = Math.max(-32768, Math.min(32767, input[i] * 32768))
+  }
+  return out
+}
+
+function bufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer)
+  let binary = ''
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i])
+  return btoa(binary)
+}
+
 export default function LiveCamera() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const wsRef = useRef<WebSocket | null>(null)
   const audioCtxRef = useRef<AudioContext | null>(null)
   const nextAudioTimeRef = useRef<number>(0)
+  const micCtxRef = useRef<AudioContext | null>(null)
+  const micProcessorRef = useRef<ScriptProcessorNode | null>(null)
+  const micStreamRef = useRef<MediaStream | null>(null)
+  const micOnRef = useRef(true)
   const streamRef = useRef<MediaStream | null>(null)
   const frameTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const sessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -37,6 +57,7 @@ export default function LiveCamera() {
   const [transcript, setTranscript] = useState<string>('')
   const [liveText, setLiveText] = useState<string>('')
   const [muted, setMuted] = useState(false)
+  const [micOn, setMicOn] = useState(true)
   const [secondsLeft, setSecondsLeft] = useState(SESSION_LIMIT_MS / 1000)
   const [error, setError] = useState<string | null>(null)
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment')
@@ -73,6 +94,14 @@ export default function LiveCamera() {
     streamRef.current?.getTracks().forEach((t) => t.stop())
     streamRef.current = null
     if (videoRef.current) videoRef.current.srcObject = null
+
+    // Stop mic
+    micProcessorRef.current?.disconnect()
+    micProcessorRef.current = null
+    micCtxRef.current?.close().catch(() => {})
+    micCtxRef.current = null
+    micStreamRef.current?.getTracks().forEach((t) => t.stop())
+    micStreamRef.current = null
 
     audioCtxRef.current?.close().catch(() => {})
     audioCtxRef.current = null
@@ -168,6 +197,15 @@ export default function LiveCamera() {
         videoRef.current.play()
       }
 
+      // 1b. Get microphone (separate stream so video track stays independent)
+      try {
+        const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+        micStreamRef.current = micStream
+      } catch {
+        // Mic denied — continue without mic, model can still see frames
+        console.warn('[LiveCamera] mic access denied, continuing without microphone')
+      }
+
       // 2. Fetch WSS URL from server (API key stays server-side)
       const configRes = await fetch('/api/live-config')
       if (!configRes.ok) {
@@ -237,7 +275,33 @@ export default function LiveCamera() {
             frameTimerRef.current = setInterval(sendFrame, FRAME_INTERVAL_MS)
             // Send one frame immediately so model has visual context before the text prompt
             sendFrame()
-            // Delay text prompt by 2s to ensure frames arrive first
+
+            // Start mic streaming if permission was granted
+            if (micStreamRef.current) {
+              try {
+                // 16kHz AudioContext so browser resamples mic to exactly what Gemini expects
+                micCtxRef.current = new AudioContext({ sampleRate: 16000 })
+                const source = micCtxRef.current.createMediaStreamSource(micStreamRef.current)
+                const processor = micCtxRef.current.createScriptProcessor(4096, 1, 1)
+                micProcessorRef.current = processor
+                processor.onaudioprocess = (e) => {
+                  if (!micOnRef.current) return
+                  if (ws.readyState !== WebSocket.OPEN) return
+                  const pcm = float32ToInt16(e.inputBuffer.getChannelData(0))
+                  ws.send(JSON.stringify({
+                    realtimeInput: {
+                      audio: { data: bufferToBase64(pcm.buffer), mimeType: 'audio/pcm;rate=16000' },
+                    },
+                  }))
+                }
+                source.connect(processor)
+                processor.connect(micCtxRef.current.destination)
+              } catch (e) {
+                console.warn('[LiveCamera] mic processor error', e)
+              }
+            }
+
+            // Delay text prompt by 2s so frames arrive before the question
             setTimeout(() => {
               if (wsRef.current?.readyState === WebSocket.OPEN) {
                 wsRef.current.send(JSON.stringify({
@@ -413,7 +477,7 @@ export default function LiveCamera() {
         )}
       </div>
 
-      {/* Mute + switch camera — outside the video box so overflow-hidden can't clip them */}
+      {/* Mute + mic + switch camera — outside the video box so overflow-hidden can't clip them */}
       <div className="flex items-center gap-2 justify-start">
         <button
           type="button"
@@ -421,7 +485,21 @@ export default function LiveCamera() {
           className="flex items-center gap-2 rounded-full bg-slate-700 px-4 py-2 text-sm text-white shadow hover:bg-slate-600 transition"
         >
           {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-          {muted ? 'الصوت مكتوم' : 'الصوت شغّال'}
+          {muted ? 'السماعة مكتومة' : 'السماعة شغّالة'}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            const next = !micOnRef.current
+            micOnRef.current = next
+            setMicOn(next)
+          }}
+          className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm text-white shadow transition ${
+            micOn ? 'bg-green-700 hover:bg-green-600' : 'bg-slate-700 hover:bg-slate-600'
+          }`}
+        >
+          {micOn ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+          {micOn ? 'الميك شغّال' : 'الميك مكتوم'}
         </button>
         <button
           type="button"
