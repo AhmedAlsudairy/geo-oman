@@ -82,7 +82,7 @@ export default function Activities() {
           </h2>
           <div className="relative h-[300px] w-full rounded-lg overflow-hidden mb-4">
             <Image
-              src="https://cdn4.premiumread.com/?url=https://omandaily.om/omandaily/uploads/images/2024/10/25/2812641.jpg"
+              src="https://d24d7vsshzrslo.cloudfront.net/sites/school102/files/styles/ins_text_and_image/public/2025-06/68869_kgis-oman-137.jpg.jpeg?itok=rgJ0lXkG"
               alt="Interactive Workshops"
               fill
               className="object-cover"
@@ -143,7 +143,7 @@ export default function Activities() {
           <div className="text-center">
             <div className="relative h-[200px] w-[200px] rounded-full mx-auto mb-4 overflow-hidden">
               <Image
-                src="https://cdn4.premiumread.com/?url=https://omandaily.om/omandaily/uploads/images/2024/10/25/2812641.jpg"
+                src="https://www.new-educ.com/wp-content/uploads/playing.jpg"
                 alt="Educational Games"
                 fill
                 className="object-cover"

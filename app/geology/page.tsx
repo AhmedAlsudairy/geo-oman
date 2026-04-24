@@ -91,7 +91,7 @@ export default function Geology() {
             <h2 className="text-2xl font-bold mb-4 text-blue-800 font-tajawal">أوفيولايت عُمان</h2>
             <div className="relative h-[400px] rounded-xl overflow-hidden mb-4">
               <Image 
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Section_of_Samail_Ophiolite.jpg/800px-Section_of_Samail_Ophiolite.jpg"
+                src="https://cnn-arabic-images.cnn.io/cloudinary/image/upload/w_1200,c_scale,q_auto/cnnarabic/2020/07/22/images/160488.avif"
                 alt="أوفيولايت عُمان"
                 fill
                 className="object-cover"

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Image from 'next/image';
-import { searchImages, UnsplashImage } from '@/lib/unsplash';
+import { searchAllSources, CommonImage } from '@/lib/imageServices';
 
 interface ImagePlaceholderProps {
   topic: string;
@@ -10,7 +10,7 @@ interface ImagePlaceholderProps {
 }
 
 export default function ImagePlaceholder({ topic, width = 400, height = 300, className = '' }: ImagePlaceholderProps) {
-  const [image, setImage] = useState<UnsplashImage | null>(null);
+  const [image, setImage] = useState<CommonImage | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +21,7 @@ export default function ImagePlaceholder({ topic, width = 400, height = 300, cla
     setError(null);
     
     try {
-      const images = await searchImages(topic);
+      const images = await searchAllSources(topic);
       if (images.length > 0) {
         setImage(images[0]);
       } else {
@@ -38,8 +38,8 @@ export default function ImagePlaceholder({ topic, width = 400, height = 300, cla
     return (
       <div className={`relative ${className}`} style={{ width, height }}>
         <Image
-          src={image.urls.regular}
-          alt={image.alt_description || topic}
+          src={image.url}
+          alt={image.alt || topic}
           fill
           className="object-cover rounded-lg"
         />

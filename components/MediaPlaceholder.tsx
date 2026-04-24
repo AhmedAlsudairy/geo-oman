@@ -30,38 +30,29 @@ const MediaPlaceholder: React.FC<MediaPlaceholderProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getGeologyKeywords = (topic: string) => {
-    const geologyKeywords: Record<string, string> = {
-      'ophiolite': 'Oman ophiolite mountains oceanic crust geological formation',
-      'wadis': 'Oman wadi canyon limestone erosion geological',
-      'caves': 'Oman cave system limestone formations stalactites',
-      'mountains': 'Oman Hajar mountains geological formations rock',
-      'desert': 'Oman desert geological formations sand dunes',
-      'rocks': 'Oman rock formations geological structures minerals',
-      'minerals': 'Oman mineral deposits geological resources crystals',
-      'fossils': 'Oman fossil deposits ancient marine life geological',
-      'default': 'Oman geological formations natural landscape'
-    };
-
-    for (const [key, value] of Object.entries(geologyKeywords)) {
-      if (topic.toLowerCase().includes(key)) {
-        return value;
-      }
-    }
-    return geologyKeywords.default;
-  };
-
   const getSearchQuery = (topic: string, category: string) => {
-    const topicMap: Record<string, string> = {
-      'geology': getGeologyKeywords(topic),
-      'landscape': 'scenic mountains wadis desert natural formations',
-      'culture': 'traditional heritage historical sites architecture',
-      'nature': 'natural wonders wildlife ecosystem biodiversity'
+    const topicKeywords: Record<string, string> = {
+      'ophiolite': 'Oman ophiolite rock',
+      'wadis': 'Oman wadi canyon',
+      'caves': 'Oman cave limestone',
+      'mountains': 'Oman mountains Hajar',
+      'desert': 'Oman desert dunes',
+      'rocks': 'Oman rock formation',
+      'minerals': 'Oman minerals crystals',
+      'fossils': 'Oman fossil ancient',
+      'geology': 'Oman geology landscape',
+      'landscape': 'Oman scenic landscape',
+      'culture': 'Oman traditional culture',
+      'nature': 'Oman nature wildlife',
     };
 
-    const baseQuery = topicMap[category] || category;
-    const locationQuery = location ? `${location} Oman` : 'Oman';
-    return `${locationQuery} ${topic} ${baseQuery}`.trim();
+    const lowerTopic = topic.toLowerCase();
+    for (const [key, value] of Object.entries(topicKeywords)) {
+      if (lowerTopic.includes(key)) return value;
+    }
+
+    const loc = location ? `${location} ` : 'Oman ';
+    return `${loc}${topic}`.trim();
   };
 
   useEffect(() => {

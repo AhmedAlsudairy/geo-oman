@@ -1,138 +1,90 @@
 'use client'
-import { useState, useCallback } from 'react'
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api'
+import dynamic from 'next/dynamic'
+import type { Site } from './LeafletMapInner'
 
-const geologicalSites = [
+type LeafletMapProps = { sites: Site[]; center: [number, number]; zoom: number }
+
+const LeafletMap = dynamic<LeafletMapProps>(() => import('./LeafletMapInner'), { ssr: false })
+
+const geologicalSites: Site[] = [
   {
     id: 1,
     title: 'جبل شمس',
-    description: 'أعلى قمة جبلية في عُمان، يعرض تكوينات جيولوجية مذهلة.',
+    description: 'أعلى قمة جبلية في عُمان بارتفاع 3009 م، يعرض تكوينات جيولوجية مذهلة من الصخور الجيرية والدولوميت التي تعود لملايين السنين.',
+    category: 'جبال',
+    color: '#f59e0b',
+    emoji: '🏔️',
+    imageUrl: 'https://peregrinetreks.com/wp-content/uploads/2024/09/Rocky-Mountain-Landscape-on-the-Road-to-Jebel-Shams-Oman.webp',
     position: { lat: 23.2367, lng: 57.2598 }
   },
   {
     id: 2,
     title: 'وادي شاب',
-    description: 'وادي طبيعي يظهر التآكل المائي والتكوينات الصخرية.',
+    description: 'وادي طبيعي خلاب يظهر التآكل المائي والتكوينات الصخرية الجيرية المتعاقبة عبر العصور الجيولوجية.',
+    category: 'أودية',
+    color: '#06b6d4',
+    emoji: '🏞️',
+    imageUrl: 'https://wejhatt.com/wp-content/uploads/2016/06/%D9%A4%D9%A4%D9%A1%D9%A1%D9%A1%D9%A1-620x330.jpg',
     position: { lat: 22.8368, lng: 59.2394 }
   },
   {
     id: 3,
     title: 'كهف الهوتة',
-    description: 'نظام كهفي طبيعي يعرض التكوينات الكلسية.',
+    description: 'نظام كهفي طبيعي فريد يعرض التكوينات الكلسية كالصواعد والنوازل، تشكّل على مدى آلاف السنين.',
+    category: 'كهوف',
+    color: '#8b5cf6',
+    emoji: '🦇',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRANl5eVzK9SEKkdGh03ldkdDJAiY0YpIwZ5g&s',
     position: { lat: 23.0833, lng: 57.3500 }
   },
   {
     id: 4,
     title: 'أفيوليت سمائل',
-    description: 'أكبر كتلة أفيوليت مكشوفة في العالم.',
+    description: 'أكبر وأحسن كتلة أفيوليت مكشوفة في العالم، تمثل قطعة من قاع المحيط القديم رُفعت فوق مستوى الأرض.',
+    category: 'صخور',
+    color: '#ef4444',
+    emoji: '🪨',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Section_of_Samail_Ophiolite.jpg/250px-Section_of_Samail_Ophiolite.jpg',
     position: { lat: 23.2000, lng: 57.5000 }
   },
   {
     id: 5,
     title: 'رمال الوهيبة',
-    description: 'كثبان رملية تظهر العمليات الجيولوجية الريحية.',
+    description: 'بحر رملي شاسع يغطي أكثر من 12,500 كم²، تظهر فيه العمليات الجيولوجية الريحية وتكوّن الكثبان.',
+    category: 'صحراء',
+    color: '#f97316',
+    emoji: '🏜️',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Wahiba_Sands_%2812%29.jpg/250px-Wahiba_Sands_%2812%29.jpg',
     position: { lat: 21.9835, lng: 58.4217 }
-  }
-];
+  },
+  {
+    id: 6,
+    title: 'بئر بهلاء',
+    description: 'موقع أثري وجيولوجي فريد يكشف طبقات الصخور الرسوبية والتراث العماني العريق في منطقة الداخلية.',
+    category: 'تراث',
+    color: '#10b981',
+    emoji: '🏛️',
+    imageUrl: 'https://www.alayyam.info/uploads/content/0703/2WB56O00-TIKP72/Shibam.jpg',
+    position: { lat: 22.9667, lng: 57.3000 }
+  },
+  {
+    id: 7,
+    title: 'جبل قمر - ظفار',
+    description: 'سلسلة جبلية ساحرة في محافظة ظفار تتميز بتنوعها الجيولوجي وظاهرة الخريف الفريدة.',
+    category: 'جبال',
+    color: '#f59e0b',
+    emoji: '⛰️',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Salalah_Oman.jpg/330px-Salalah_Oman.jpg',
+    position: { lat: 17.0500, lng: 54.1000 }
+  },
+]
 
-const mapCenter = {
-  lat: 22.5,
-  lng: 58.0
-}
-
-const mapOptions = {
-  disableDefaultUI: true,
-  zoomControl: true,
-  styles: [
-    {
-      featureType: "landscape",
-      stylers: [{ saturation: -100 }, { lightness: 60 }]
-    },
-    {
-      featureType: "road",
-      stylers: [{ saturation: -100 }, { lightness: 40 }]
-    },
-    {
-      featureType: "water",
-      stylers: [{ saturation: -10 }, { lightness: 30 }]
-    }
-  ]
-};
+const mapCenter: [number, number] = [21.5, 57.5]
 
 export default function GeologyMap() {
-  const [selectedSite, setSelectedSite] = useState<typeof geologicalSites[0] | null>(null);
-  const [map, setMap] = useState<google.maps.Map | null>(null);
-
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyACt4jd9Zb4h1dVn1Y_HfCEpGm0bKbhsBM",
-    id: 'google-map-script'
-  });
-
-  const onLoad = useCallback((map: google.maps.Map) => {
-    const bounds = new google.maps.LatLngBounds();
-    geologicalSites.forEach(({ position }) => bounds.extend(position));
-    map.fitBounds(bounds);
-    setMap(map);
-  }, []);
-
-  const onUnmount = useCallback(() => {
-    setMap(null);
-  }, []);
-
-  if (loadError) {
-    return (
-      <div className="flex items-center justify-center h-[400px] bg-gray-100 rounded-lg">
-        <p className="text-red-500">Error loading maps</p>
-      </div>
-    );
-  }
-
-  if (!isLoaded) {
-    return (
-      <div className="flex items-center justify-center h-[400px] bg-gray-100 rounded-lg">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-      </div>
-    );
-  }
-
   return (
     <div className="relative">
-      <GoogleMap
-        mapContainerClassName="w-full h-[400px] rounded-lg"
-        center={mapCenter}
-        zoom={7}
-        options={mapOptions}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
-      >
-        {geologicalSites.map((site) => (
-          <Marker
-            key={site.id}
-            position={site.position}
-            onClick={() => setSelectedSite(site)}
-            icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 8,
-              fillColor: "#4A90E2",
-              fillOpacity: 0.9,
-              strokeWeight: 2,
-              strokeColor: "#FFFFFF"
-            }}
-          />
-        ))}
-
-        {selectedSite && (
-          <InfoWindow
-            position={selectedSite.position}
-            onCloseClick={() => setSelectedSite(null)}
-          >
-            <div className="p-2">
-              <h3 className="font-bold text-lg mb-1">{selectedSite.title}</h3>
-              <p className="text-gray-600">{selectedSite.description}</p>
-            </div>
-          </InfoWindow>
-        )}
-      </GoogleMap>
+      <LeafletMap sites={geologicalSites} center={mapCenter} zoom={6} />
     </div>
-  );
+  )
 }

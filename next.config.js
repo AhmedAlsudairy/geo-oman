@@ -66,6 +66,38 @@ const nextConfig = {
         protocol: 'https',
         hostname: 's3.eu-1.blufs.ir',
       },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cnn-arabic-images.cnn.io',
+      },
+       {
+        protocol: 'https',
+        hostname: 'rockidentifier.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.omanobserver.om',
+      },
+       {
+        protocol: 'https',
+        hostname: 'd24d7vsshzrslo.cloudfront.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.new-educ.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.alayyam.info',
+      },
+      {
+        protocol: 'https',
+        hostname: 'encrypted-tbn0.gstatic.com',
+      },
     ],
   },
 }

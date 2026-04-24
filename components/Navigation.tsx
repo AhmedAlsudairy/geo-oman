@@ -19,6 +19,7 @@ const Navigation = () => {
     { href: '/activities', label: 'الأنشطة التعليمية' },
     { href: '/media', label: 'الوسائط المتعددة' },
     { href: '/experience', label: 'تجربتي في جيو عُمان' },
+    { href: '/rock-expert', label: 'خبير الصخور 🪨' },
     { href: '/contact', label: 'اتصل بنا' },
   ]
 

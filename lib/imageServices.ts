@@ -95,9 +95,24 @@ export async function searchAllSources(query: string): Promise<CommonImage[]> {
       searchUnsplash(query)
     ]);
 
-    // Combine and shuffle results
     const allResults = [...pexelsResults, ...pixabayResults, ...unsplashResults];
-    return allResults.sort(() => Math.random() - 0.5);
+    if (allResults.length > 0) {
+      return allResults.sort(() => Math.random() - 0.5);
+    }
+
+    // Fallback: retry with a simpler query (first 2 meaningful words + Oman)
+    const simpleWords = query.replace(/[^a-zA-Z ]/g, '').trim().split(/\s+/).slice(0, 2).join(' ');
+    const fallbackQuery = simpleWords ? `Oman ${simpleWords}` : 'Oman landscape';
+    if (fallbackQuery !== query) {
+      const [fp, fpi, fu] = await Promise.all([
+        searchPexels(fallbackQuery),
+        searchPixabay(fallbackQuery),
+        searchUnsplash(fallbackQuery)
+      ]);
+      return [...fp, ...fpi, ...fu].sort(() => Math.random() - 0.5);
+    }
+
+    return [];
   } catch (error) {
     console.error('Error searching all sources:', error);
     return [];

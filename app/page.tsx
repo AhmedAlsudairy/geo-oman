@@ -219,7 +219,7 @@ function FeatureCard({ icon: Icon, title, description, topic }: {
   topic: string 
 }) {
   const imageMap: { [key: string]: string } = {
-    "تنوع جيولوجي فريد": "https://cdn4.premiumread.com/?url=https://omandaily.om/omandaily/uploads/images/2024/10/25/2812641.jpg&w=1000&q=72&f=jpg&t=1",
+    "تنوع جيولوجي فريد": "https://wejhatt.com/wp-content/uploads/2025/01/IMG_8238-768x927.jpeg",
     "تاريخ جيولوجي غني": "https://alwatan.om/uploads/important_images/uploads/2020/09/0194.jpg",
     "كنوز معدنية": "https://ik.imagekit.io/d3nlekvyf/wisalfm/media/article/1759/thumbnail_image_16_9.jpg?format=auto&ar=16-9&fit=crop&tr=ar-16-9%2Cw-1000&v=030723083904"
   };

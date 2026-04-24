@@ -53,7 +53,7 @@ export default function Store() {
       name: 'Sandstone Formation',
       arabicName: 'تكوين الحجر الرملي',
       price: 28,
-      image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Millet-Seed_Sandstone_Macro.JPG/220px-Millet-Seed_Sandstone_Macro.JPG',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Millet-Seed_Sandstone_Macro.JPG/250px-Millet-Seed_Sandstone_Macro.jpg',
       category: 'rocks',
       description: 'عينة من الحجر الرملي العماني المميز، يظهر طبقات الترسبات القديمة'
     },
@@ -62,7 +62,7 @@ export default function Store() {
       name: 'Crystal Formation',
       arabicName: 'تكوين البلورات',
       price: 50,
-      image: 'https://s3.eu-1.blufs.ir/aradbranding-ar-uploads/topics/16764479121305.jpg',
+      image: 'https://rockidentifier.com/image-handle/image/1080/154225730111143937.jpeg?x-oss-process=image/format,webp/resize,s_300&v=1.0',
       category: 'crystals',
       description: 'تشكيلة بلورية نادرة من المعادن العمانية، تعكس جمال الطبيعة'
     }
