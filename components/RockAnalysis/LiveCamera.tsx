@@ -121,11 +121,16 @@ export default function LiveCamera() {
   // ── Play PCM audio from Gemini ───────────────────────────────
   // Chunks are scheduled sequentially on the AudioContext clock to prevent
   // overlap or gaps. nextAudioTimeRef tracks the end time of the last chunk.
-  const playPcm = useCallback((b64: string) => {
+  // sampleRate is read from the mimeType (e.g. "audio/pcm;rate=24000").
+  // AudioContext uses the browser's native rate so the built-in resampler
+  // handles 24kHz→44100/48kHz correctly — forcing sampleRate:24000 on the
+  // context caused some browsers to play audio at the wrong speed.
+  const playPcm = useCallback((b64: string, sampleRate = 24000) => {
     if (muted) return
     try {
       if (!audioCtxRef.current) {
-        audioCtxRef.current = new AudioContext({ sampleRate: 24000 })
+        // Use browser's native sample rate — do NOT force 24000 here.
+        audioCtxRef.current = new AudioContext()
       }
       const ctx = audioCtxRef.current
 
@@ -134,7 +139,8 @@ export default function LiveCamera() {
 
       const raw = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))
       const samples = pcmToFloat32(raw.buffer)
-      const buf = ctx.createBuffer(1, samples.length, 24000)
+      // Create buffer at the actual PCM rate; browser resamples to ctx rate.
+      const buf = ctx.createBuffer(1, samples.length, sampleRate)
       buf.copyToChannel(samples, 0)
 
       // Schedule this chunk to start right after the previous one ends.
@@ -262,7 +268,10 @@ export default function LiveCamera() {
           if (sc.modelTurn?.parts) {
             for (const part of sc.modelTurn.parts) {
               if (part.inlineData?.mimeType?.startsWith('audio/')) {
-                playPcm(part.inlineData.data)
+                // Parse rate from e.g. "audio/pcm;rate=24000"
+                const rateMatch = part.inlineData.mimeType.match(/rate=(\d+)/)
+                const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000
+                playPcm(part.inlineData.data, sampleRate)
               }
             }
           }
