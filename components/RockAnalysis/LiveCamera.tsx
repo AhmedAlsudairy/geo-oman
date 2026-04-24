@@ -223,6 +223,10 @@ export default function LiveCamera() {
             setStatus('live')
 
             frameTimerRef.current = setInterval(sendFrame, FRAME_INTERVAL_MS)
+            // Send one initial prompt so model knows to start describing
+            ws.send(JSON.stringify({
+              realtimeInput: { text: 'صِف ما تراه أمامك بجملة أو جملتين فقط.' },
+            }))
 
             sessionTimerRef.current = setTimeout(() => {
               setStatus('ended')
@@ -383,32 +387,32 @@ export default function LiveCamera() {
           </div>
         )}
 
-        {/* Top-left controls: mute + switch camera — always on top */}
-        <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setMuted((m) => !m)}
-            className="flex items-center justify-center rounded-full bg-black/60 p-2.5 text-white shadow-lg backdrop-blur hover:bg-black/80 transition"
-            title={muted ? 'تشغيل الصوت' : 'كتم الصوت'}
-          >
-            {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-          </button>
-          <button
-            type="button"
-            onClick={switchCamera}
-            className="flex items-center justify-center rounded-full bg-black/60 p-2.5 text-white shadow-lg backdrop-blur hover:bg-black/80 transition"
-            title={facingMode === 'environment' ? 'تحويل للكاميرا الأمامية' : 'تحويل للكاميرا الخلفية'}
-          >
-            <SwitchCamera className="h-5 w-5" />
-          </button>
-        </div>
-
         {/* Live transcript overlay */}
         {liveText && status === 'live' && (
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-4 py-4">
             <p className="text-sm font-medium text-white leading-relaxed text-right line-clamp-3">{liveText}</p>
           </div>
         )}
+      </div>
+
+      {/* Mute + switch camera — outside the video box so overflow-hidden can't clip them */}
+      <div className="flex items-center gap-2 justify-start">
+        <button
+          type="button"
+          onClick={() => setMuted((m) => !m)}
+          className="flex items-center gap-2 rounded-full bg-slate-700 px-4 py-2 text-sm text-white shadow hover:bg-slate-600 transition"
+        >
+          {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          {muted ? 'الصوت مكتوم' : 'الصوت شغّال'}
+        </button>
+        <button
+          type="button"
+          onClick={switchCamera}
+          className="flex items-center gap-2 rounded-full bg-slate-700 px-4 py-2 text-sm text-white shadow hover:bg-slate-600 transition"
+        >
+          <SwitchCamera className="h-4 w-4" />
+          {facingMode === 'environment' ? 'كاميرا أمامية' : 'كاميرا خلفية'}
+        </button>
       </div>
 
       {/* Controls */}
