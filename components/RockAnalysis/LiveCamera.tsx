@@ -25,7 +25,6 @@ export default function LiveCamera() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const wsRef = useRef<WebSocket | null>(null)
   const audioCtxRef = useRef<AudioContext | null>(null)
-  const nextAudioTimeRef = useRef<number>(0)   // scheduled end of last audio chunk
   const streamRef = useRef<MediaStream | null>(null)
   const frameTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const textTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -80,7 +79,6 @@ export default function LiveCamera() {
 
     audioCtxRef.current?.close().catch(() => {})
     audioCtxRef.current = null
-    nextAudioTimeRef.current = 0
 
     setupDoneRef.current = false
     isLiveRef.current = false
@@ -119,39 +117,24 @@ export default function LiveCamera() {
   }, [])
 
   // ── Play PCM audio from Gemini ───────────────────────────────
-  // Chunks are scheduled sequentially on the AudioContext clock to prevent
-  // overlap or gaps. nextAudioTimeRef tracks the end time of the last chunk.
-  // sampleRate is read from the mimeType (e.g. "audio/pcm;rate=24000").
-  // AudioContext uses the browser's native rate so the built-in resampler
-  // handles 24kHz→44100/48kHz correctly — forcing sampleRate:24000 on the
-  // context caused some browsers to play audio at the wrong speed.
   const playPcm = useCallback((b64: string, sampleRate = 24000) => {
     if (muted) return
     try {
       if (!audioCtxRef.current) {
-        // Use browser's native sample rate — do NOT force 24000 here.
         audioCtxRef.current = new AudioContext()
       }
       const ctx = audioCtxRef.current
-
-      // Resume if browser suspended it (autoplay policy)
       if (ctx.state === 'suspended') ctx.resume()
 
       const raw = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))
       const samples = pcmToFloat32(raw.buffer)
-      // Create buffer at the actual PCM rate; browser resamples to ctx rate.
       const buf = ctx.createBuffer(1, samples.length, sampleRate)
       buf.copyToChannel(samples, 0)
-
-      // Schedule this chunk to start right after the previous one ends.
-      // If we've fallen behind real-time (long gap), reset to now.
-      const startAt = Math.max(ctx.currentTime, nextAudioTimeRef.current)
-      nextAudioTimeRef.current = startAt + buf.duration
 
       const src = ctx.createBufferSource()
       src.buffer = buf
       src.connect(ctx.destination)
-      src.start(startAt)
+      src.start()
     } catch (e) {
       console.warn('[LiveCamera] audio playback error', e)
     }
