@@ -179,10 +179,15 @@ export default function LiveCamera() {
       }, SETUP_TIMEOUT_MS)
 
       ws.onopen = () => {
+        // Raw WebSocket proto field is "setup", NOT "config".
+        // responseModalities must be nested inside generationConfig.
+        // outputAudioTranscription and systemInstruction are top-level setup fields.
         ws.send(JSON.stringify({
-          config: {
+          setup: {
             model: `models/${MODEL}`,
-            responseModalities: ['AUDIO'],
+            generationConfig: {
+              responseModalities: ['AUDIO'],
+            },
             outputAudioTranscription: {},
             systemInstruction: { parts: [{ text: LIVE_ROCK_EXPERT_PROMPT }] },
           },
