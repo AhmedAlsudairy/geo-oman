@@ -4,8 +4,7 @@ import { Video, VideoOff, Loader2, Volume2, VolumeX, SwitchCamera } from 'lucide
 import { LIVE_ROCK_EXPERT_PROMPT } from '@/services/rockAnalysisService'
 
 const MODEL = 'gemini-3.1-flash-live-preview'
-const FRAME_INTERVAL_MS = 1000
-const TEXT_PROMPT_INTERVAL_MS = 5000
+const FRAME_INTERVAL_MS = 1500
 const SESSION_LIMIT_MS = 110 * 1000
 const SETUP_TIMEOUT_MS = 15000 // bail if setupComplete never arrives
 
@@ -27,7 +26,6 @@ export default function LiveCamera() {
   const audioCtxRef = useRef<AudioContext | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const frameTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const textTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const sessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const setupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const setupDoneRef = useRef(false)
@@ -48,12 +46,10 @@ export default function LiveCamera() {
 
   const stopAll = useCallback(() => {
     clearInterval(frameTimerRef.current!)
-    clearInterval(textTimerRef.current!)
     clearTimeout(sessionTimerRef.current!)
     clearInterval(countdownRef.current!)
     clearTimeout(setupTimeoutRef.current!)
     frameTimerRef.current = null
-    textTimerRef.current = null
     sessionTimerRef.current = null
     countdownRef.current = null
     setupTimeoutRef.current = null
@@ -227,8 +223,6 @@ export default function LiveCamera() {
             setStatus('live')
 
             frameTimerRef.current = setInterval(sendFrame, FRAME_INTERVAL_MS)
-            textTimerRef.current = setInterval(sendTextPrompt, TEXT_PROMPT_INTERVAL_MS)
-            sendTextPrompt()
 
             sessionTimerRef.current = setTimeout(() => {
               setStatus('ended')
@@ -389,23 +383,23 @@ export default function LiveCamera() {
           </div>
         )}
 
-        {/* Top-left controls: mute + switch camera */}
-        <div className="absolute top-3 left-3 flex items-center gap-2">
+        {/* Top-left controls: mute + switch camera — always on top */}
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
           <button
             type="button"
             onClick={() => setMuted((m) => !m)}
-            className="flex items-center justify-center rounded-full bg-black/50 p-2 text-white backdrop-blur hover:bg-black/70 transition"
+            className="flex items-center justify-center rounded-full bg-black/60 p-2.5 text-white shadow-lg backdrop-blur hover:bg-black/80 transition"
             title={muted ? 'تشغيل الصوت' : 'كتم الصوت'}
           >
-            {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+            {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
           </button>
           <button
             type="button"
             onClick={switchCamera}
-            className="flex items-center justify-center rounded-full bg-black/50 p-2 text-white backdrop-blur hover:bg-black/70 transition"
+            className="flex items-center justify-center rounded-full bg-black/60 p-2.5 text-white shadow-lg backdrop-blur hover:bg-black/80 transition"
             title={facingMode === 'environment' ? 'تحويل للكاميرا الأمامية' : 'تحويل للكاميرا الخلفية'}
           >
-            <SwitchCamera className="h-4 w-4" />
+            <SwitchCamera className="h-5 w-5" />
           </button>
         </div>
 
