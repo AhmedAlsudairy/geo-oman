@@ -4,9 +4,10 @@ import { Video, VideoOff, Loader2, Volume2, VolumeX, SwitchCamera } from 'lucide
 import { LIVE_ROCK_EXPERT_PROMPT } from '@/services/rockAnalysisService'
 
 const MODEL = 'gemini-3.1-flash-live-preview'
-const FRAME_INTERVAL_MS = 1000      // 1 FPS (Live API max)
-const TEXT_PROMPT_INTERVAL_MS = 5000 // Ask for analysis every 5s
-const SESSION_LIMIT_MS = 110 * 1000  // ~2 min safety cutoff
+const FRAME_INTERVAL_MS = 1000
+const TEXT_PROMPT_INTERVAL_MS = 5000
+const SESSION_LIMIT_MS = 110 * 1000
+const SETUP_TIMEOUT_MS = 15000 // bail if setupComplete never arrives
 
 type Status = 'idle' | 'connecting' | 'live' | 'error' | 'ended'
 
@@ -28,7 +29,10 @@ export default function LiveCamera() {
   const frameTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const textTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const sessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const setupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const setupDoneRef = useRef(false)
+  // Tracks live state inside WS closures — avoids stale 'status' state captures
+  const isLiveRef = useRef(false)
 
   const [status, setStatus] = useState<Status>('idle')
   const [transcript, setTranscript] = useState<string>('')
@@ -38,29 +42,46 @@ export default function LiveCamera() {
   const [error, setError] = useState<string | null>(null)
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment')
 
+
   // ── Countdown ticker ────────────────────────────────────────
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const stopAll = useCallback(() => {
-    frameTimerRef.current && clearInterval(frameTimerRef.current)
-    textTimerRef.current && clearInterval(textTimerRef.current)
-    sessionTimerRef.current && clearTimeout(sessionTimerRef.current)
-    countdownRef.current && clearInterval(countdownRef.current)
+    clearInterval(frameTimerRef.current!)
+    clearInterval(textTimerRef.current!)
+    clearTimeout(sessionTimerRef.current!)
+    clearInterval(countdownRef.current!)
+    clearTimeout(setupTimeoutRef.current!)
+    frameTimerRef.current = null
+    textTimerRef.current = null
+    sessionTimerRef.current = null
+    countdownRef.current = null
+    setupTimeoutRef.current = null
 
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.close()
+    // Null out handlers before closing — prevents recursive onclose triggers
+    if (wsRef.current) {
+      wsRef.current.onopen = null
+      wsRef.current.onmessage = null
+      wsRef.current.onerror = null
+      wsRef.current.onclose = null
+      if (
+        wsRef.current.readyState === WebSocket.OPEN ||
+        wsRef.current.readyState === WebSocket.CONNECTING
+      ) {
+        wsRef.current.close()
+      }
+      wsRef.current = null
     }
-    wsRef.current = null
 
     streamRef.current?.getTracks().forEach((t) => t.stop())
     streamRef.current = null
-
     if (videoRef.current) videoRef.current.srcObject = null
 
-    audioCtxRef.current?.close()
+    audioCtxRef.current?.close().catch(() => {})
     audioCtxRef.current = null
 
     setupDoneRef.current = false
+    isLiveRef.current = false
   }, [])
 
   // ── Send a JPEG frame via WebSocket ─────────────────────────
@@ -148,57 +169,68 @@ export default function LiveCamera() {
       const ws = new WebSocket(wsUrl)
       wsRef.current = ws
 
+      // Bail if setupComplete never arrives within timeout
+      setupTimeoutRef.current = setTimeout(() => {
+        if (!setupDoneRef.current) {
+          setError('انتهت مهلة الاتصال. تحقق من مفتاح Gemini API في Vercel وحاول مجدداً.')
+          setStatus('error')
+          stopAll()
+        }
+      }, SETUP_TIMEOUT_MS)
+
       ws.onopen = () => {
-        // Send setup config
         ws.send(JSON.stringify({
           config: {
             model: `models/${MODEL}`,
             responseModalities: ['AUDIO'],
             outputAudioTranscription: {},
-            systemInstruction: {
-              parts: [{ text: LIVE_ROCK_EXPERT_PROMPT }],
-            },
+            systemInstruction: { parts: [{ text: LIVE_ROCK_EXPERT_PROMPT }] },
           },
         }))
       }
 
       ws.onmessage = (event) => {
-        // First message is setupComplete
-        if (!setupDoneRef.current) {
-          setupDoneRef.current = true
-          setStatus('live')
-
-          // Start frame capture
-          frameTimerRef.current = setInterval(sendFrame, FRAME_INTERVAL_MS)
-          // Start periodic text prompts
-          textTimerRef.current = setInterval(sendTextPrompt, TEXT_PROMPT_INTERVAL_MS)
-          sendTextPrompt() // ask immediately
-
-          // Session timeout
-          sessionTimerRef.current = setTimeout(() => {
-            setStatus('ended')
-            stopAll()
-          }, SESSION_LIMIT_MS)
-
-          // Countdown
-          countdownRef.current = setInterval(() => {
-            setSecondsLeft((s) => {
-              if (s <= 1) {
-                clearInterval(countdownRef.current!)
-                return 0
-              }
-              return s - 1
-            })
-          }, 1000)
-          return
-        }
-
         try {
           const msg = JSON.parse(event.data as string)
+
+          // ── Handle setupComplete (first message) ──
+          if (!setupDoneRef.current) {
+            // Check for server-side error during setup
+            if (msg.error) {
+              clearTimeout(setupTimeoutRef.current!)
+              setError(`خطأ من خادم Gemini: ${msg.error.message ?? JSON.stringify(msg.error)}`)
+              setStatus('error')
+              stopAll()
+              return
+            }
+            // First non-error message = setupComplete
+            clearTimeout(setupTimeoutRef.current!)
+            setupDoneRef.current = true
+            isLiveRef.current = true
+            setStatus('live')
+
+            frameTimerRef.current = setInterval(sendFrame, FRAME_INTERVAL_MS)
+            textTimerRef.current = setInterval(sendTextPrompt, TEXT_PROMPT_INTERVAL_MS)
+            sendTextPrompt()
+
+            sessionTimerRef.current = setTimeout(() => {
+              setStatus('ended')
+              stopAll()
+            }, SESSION_LIMIT_MS)
+
+            countdownRef.current = setInterval(() => {
+              setSecondsLeft((s) => {
+                if (s <= 1) { clearInterval(countdownRef.current!); return 0 }
+                return s - 1
+              })
+            }, 1000)
+            return
+          }
+
+          // ── Handle model responses ──
           const sc = msg.serverContent
           if (!sc) return
 
-          // Audio PCM
           if (sc.modelTurn?.parts) {
             for (const part of sc.modelTurn.parts) {
               if (part.inlineData?.mimeType?.startsWith('audio/')) {
@@ -207,7 +239,6 @@ export default function LiveCamera() {
             }
           }
 
-          // Output transcription (what Gemini is saying)
           if (sc.outputTranscription?.text) {
             setLiveText(sc.outputTranscription.text)
             setTranscript((prev) => prev + sc.outputTranscription.text)
@@ -218,13 +249,19 @@ export default function LiveCamera() {
       }
 
       ws.onerror = () => {
-        setError('خطأ في اتصال WebSocket')
-        setStatus('error')
-        stopAll()
+        // ws.onclose fires right after; handle status transition there
+        console.warn('[LiveCamera] WebSocket error')
       }
 
-      ws.onclose = () => {
-        if (status === 'live') setStatus('ended')
+      // ── KEY FIX: use isLiveRef not stale 'status' state ──
+      ws.onclose = (event) => {
+        if (isLiveRef.current) {
+          setStatus('ended')
+        } else if (!setupDoneRef.current) {
+          const reason = event.reason || `code ${event.code}`
+          setError(`فشل الاتصال بالخبير الجيولوجي (${reason})`)
+          setStatus('error')
+        }
         stopAll()
       }
     } catch (err: unknown) {
@@ -233,7 +270,8 @@ export default function LiveCamera() {
       setStatus('error')
       stopAll()
     }
-  }, [muted, facingMode, sendFrame, sendTextPrompt, playPcm, stopAll, status])
+  // 'status' intentionally excluded — using isLiveRef inside WS closures instead
+  }, [facingMode, sendFrame, sendTextPrompt, playPcm, stopAll])
 
   // ── Switch camera (front / rear) ────────────────────────────
   const switchCamera = useCallback(async () => {
@@ -298,12 +336,13 @@ export default function LiveCamera() {
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/40 backdrop-blur-sm">
             <Loader2 className="h-10 w-10 animate-spin text-amber-400" />
             <p className="text-sm font-semibold text-white">جارٍ الاتصال بالخبير الجيولوجي...</p>
+            <p className="text-xs text-white/50">قد يستغرق حتى 15 ثانية</p>
           </div>
         )}
 
         {/* Overlay: error */}
         {status === 'error' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/50">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 px-6 text-center">
             <VideoOff className="h-10 w-10 text-red-400" />
             <p className="text-sm font-semibold text-red-300">{error}</p>
           </div>
